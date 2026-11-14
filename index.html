@@ -1,18 +1,233 @@
-<!DOCTYPE html>
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7fb">
+    <meta name="description" content="Spor salonları için antrenman seansı ve üye takip aracı.">
+    <title>Salonun — Salon yönetimi</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <section class="auth-screen" id="auth-screen">
+      <div class="auth-card">
+        <a class="brand auth-brand" href="#" aria-label="Salonun ana sayfa">
+          <span class="brand-mark" aria-hidden="true">s</span>
+          <span>Salonun<span class="brand-period">.</span></span>
+        </a>
+        <p class="eyebrow">SPOR SALONU ÜYE PORTALI</p>
+        <h1 id="auth-heading">Hesabına giriş yap</h1>
+        <p class="auth-subtitle" id="auth-subtitle">Seanslarını ve salon bilgilerini görüntülemek için giriş yap.</p>
+        <p class="setup-notice" id="setup-notice" hidden>Giriş sistemini etkinleştirmek için Supabase ayarlarını ekle. Kurulum adımları README dosyasında.</p>
+        <form id="login-form">
+          <label class="field-label">E-posta<input name="email" type="email" autocomplete="email" placeholder="sen@ornek.com" required></label>
+          <label class="field-label">Şifre<input name="password" type="password" autocomplete="current-password" placeholder="Şifren" required minlength="8"></label>
+          <p class="form-error" id="login-error" role="alert" hidden></p>
+          <button class="button button-primary auth-submit" type="submit">Giriş yap</button>
+          <button class="auth-link" id="forgot-password" type="button">Şifremi unuttum</button>
+        </form>
+        <form id="password-setup-form" hidden>
+          <label class="field-label">Yeni şifre<input name="password" type="password" autocomplete="new-password" placeholder="En az 8 karakter" required minlength="8"></label>
+          <label class="field-label">Yeni şifre (tekrar)<input name="confirm_password" type="password" autocomplete="new-password" placeholder="Şifreni tekrar gir" required minlength="8"></label>
+          <p class="form-error" id="password-error" role="alert" hidden></p>
+          <button class="button button-primary auth-submit" type="submit">Şifremi belirle</button>
+        </form>
+        <button class="auth-link" id="auth-sign-out" type="button" hidden>Bu hesaptan çıkış yap</button>
+      </div>
+    </section>
 
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  <title>my-first-website</title>
-  <LINK href="styles.css" rel="stylesheet" type="text/css">
-</head>
+    <div class="app-shell" id="admin-app" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="#" aria-label="Salonun ana sayfa">
+          <span class="brand-mark" aria-hidden="true">s</span>
+          <span>Salonun<span class="brand-period">.</span></span>
+        </a>
 
-<body>
+        <p class="nav-label">MENÜ</p>
+        <nav class="main-nav" aria-label="Ana menü">
+          <button class="nav-item is-active" type="button" data-view="overview">
+            <span class="nav-icon" aria-hidden="true">▦</span> Genel bakış
+          </button>
+          <button class="nav-item" type="button" data-view="appointments">
+            <span class="nav-icon" aria-hidden="true">◷</span> Seanslar
+          </button>
+          <button class="nav-item" type="button" data-view="customers">
+            <span class="nav-icon" aria-hidden="true">♙</span> Üyeler
+          </button>
+        </nav>
 
-<img src="https://octodex.github.com/images/daftpunktocat-thomas.gif" id="octocat" alt="octocat-gif" />
+        <div class="sidebar-bottom">
+          <div class="profile-avatar" aria-hidden="true">İ</div>
+          <div>
+            <strong id="admin-name">Salon yöneticisi</strong>
+            <span id="admin-email"></span>
+          </div>
+          <button class="sign-out-button" type="button" data-sign-out>Çıkış</button>
+        </div>
+      </aside>
 
-<!-- Change this code here by copy and pasting your template on line 15 -->
-<p>Welcome to your first GitHub Pages website!</p>
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumb">Çalışma alanı <span>/</span> <strong id="breadcrumb-current">Genel bakış</strong></div>
+          <div class="topbar-actions">
+            <span class="today-label" id="today-label"></span>
+            <button class="button button-primary topbar-new" type="button" data-open-modal>
+              <span aria-hidden="true">+</span> Seans planla
+            </button>
+          </div>
+        </header>
 
-</body>
+        <section class="page-content" id="overview-view">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">SALON PANELİ</p>
+              <h1>Günaydın, antrenmana hazır mısın? <span aria-hidden="true">💪</span></h1>
+              <p class="page-subtitle">Bugünün seanslarını ve üyelerini tek bir yerden takip et.</p>
+            </div>
+          </div>
+
+          <div class="stats-grid" aria-label="Seans özeti">
+            <article class="stat-card">
+              <div class="stat-top"><span>Bugünkü seanslar</span><span class="stat-icon lilac" aria-hidden="true">◷</span></div>
+              <strong class="stat-value" id="today-count">0</strong>
+              <span class="stat-foot"><span class="stat-dot"></span> Bugün için planlanan</span>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Planlanan seanslar</span><span class="stat-icon peach" aria-hidden="true">◌</span></div>
+              <strong class="stat-value" id="pending-count">0</strong>
+              <span class="stat-foot">Henüz tamamlanmayan seanslar</span>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Toplam üye</span><span class="stat-icon mint" aria-hidden="true">♙</span></div>
+              <strong class="stat-value" id="customer-count">0</strong>
+              <span class="stat-foot">Seans planlanan üyeler</span>
+            </article>
+          </div>
+
+          <section class="panel appointments-panel" aria-labelledby="appointments-title">
+            <div class="panel-heading">
+              <div>
+                <h2 id="appointments-title">Yaklaşan seanslar</h2>
+                <p>Salonundaki sıradaki antrenmanlar</p>
+              </div>
+              <button class="text-button" type="button" data-view-link="appointments">Tümünü gör <span aria-hidden="true">→</span></button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>ÜYE</th><th>ANTRENMAN</th><th>TARİH &amp; SAAT</th><th>DURUM</th></tr>
+                </thead>
+                <tbody id="upcoming-table"></tbody>
+              </table>
+              <div class="empty-state" id="overview-empty" hidden>
+                <span class="empty-icon" aria-hidden="true">◷</span>
+                <strong>Henüz seans planlanmamış</strong>
+                <span>İlk antrenman seansını planlayarak başlayabilirsin.</span>
+                <button class="button button-secondary" type="button" data-open-modal>Seans planla</button>
+              </div>
+            </div>
+          </section>
+          <p class="privacy-note"><span aria-hidden="true">🔒</span> Üye ve seans bilgileri salonunun güvenli hesabında saklanır.</p>
+        </section>
+
+        <section class="page-content secondary-view" id="appointments-view" hidden>
+          <div class="page-heading compact-heading">
+            <div>
+              <p class="eyebrow">PLANLAMA</p>
+              <h1>Seanslar</h1>
+              <p class="page-subtitle">Antrenman seanslarını görüntüle ve durumlarını güncelle.</p>
+            </div>
+            <button class="button button-primary" type="button" data-open-modal><span aria-hidden="true">+</span> Seans planla</button>
+          </div>
+          <section class="panel">
+            <div class="list-toolbar">
+              <div class="filter-tabs" role="group" aria-label="Seansları filtrele">
+                <button class="filter-tab is-selected" type="button" data-filter="all">Tümü</button>
+                <button class="filter-tab" type="button" data-filter="Planlandı">Planlandı</button>
+                <button class="filter-tab" type="button" data-filter="Tamamlandı">Tamamlandı</button>
+                <button class="filter-tab" type="button" data-filter="İptal">İptal</button>
+              </div>
+              <label class="search-box"><span aria-hidden="true">⌕</span><input id="appointment-search" type="search" placeholder="Seans ara..." aria-label="Seanslarda ara"></label>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ÜYE</th><th>ANTRENMAN</th><th>TARİH &amp; SAAT</th><th>DURUM</th></tr></thead>
+                <tbody id="appointments-table"></tbody>
+              </table>
+              <div class="empty-state" id="appointments-empty" hidden><span class="empty-icon" aria-hidden="true">⌕</span><strong>Seans bulunamadı</strong><span>Aramanı veya filtrelerini değiştirebilirsin.</span></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page-content secondary-view" id="customers-view" hidden>
+          <div class="page-heading compact-heading">
+            <div>
+              <p class="eyebrow">ÜYE TAKİBİ</p>
+              <h1>Üyeler</h1>
+              <p class="page-subtitle">Planlanan seanslardan otomatik oluşturulan üye listen.</p>
+            </div>
+          </div>
+          <section class="panel">
+            <div class="panel-heading customer-panel-heading">
+              <div><h2>Kayıtlı üyeler</h2><p id="customer-list-summary">Üyelerin burada görünür.</p></div>
+              <label class="search-box"><span aria-hidden="true">⌕</span><input id="customer-search" type="search" placeholder="Üye ara..." aria-label="Üyelerde ara"></label>
+            </div>
+            <form class="invite-form" id="invite-member-form">
+              <div class="invite-heading"><strong>Yeni üye kaydet</strong><span>Üyeye giriş bağlantısı e-postayla gönderilir.</span></div>
+              <div class="invite-fields">
+                <label class="field-label">Üye adı<input name="full_name" type="text" placeholder="Örn. Ayşe Yılmaz" required maxlength="100"></label>
+                <label class="field-label">E-posta<input name="email" type="email" placeholder="uye@ornek.com" required maxlength="320"></label>
+                <label class="field-label">Telefon<input name="phone" type="tel" placeholder="05xx xxx xx xx" maxlength="30"></label>
+                <button class="button button-primary" type="submit">Üyeyi davet et</button>
+              </div>
+              <p class="form-error" id="invite-error" role="alert" hidden></p>
+            </form>
+            <div class="customer-grid" id="customer-list"></div>
+            <div class="empty-state" id="customers-empty" hidden><span class="empty-icon" aria-hidden="true">♙</span><strong>Henüz üye yok</strong><span>Üyeleri buradan kaydedip giriş yapmaları için davet edebilirsin.</span></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="appointment-dialog" id="appointment-dialog" aria-labelledby="dialog-title">
+      <form id="appointment-form">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">YENİ SEANS</p><h2 id="dialog-title">Antrenman seansı planla</h2></div>
+          <button class="icon-button" type="button" data-close-modal aria-label="Pencereyi kapat">×</button>
+        </div>
+        <label class="field-label">Üye<select name="member_id" id="session-member-select" required><option value="">Önce üye ekle</option></select></label>
+        <label class="field-label">Antrenman türü<input name="service" type="text" placeholder="Örn. Kişisel antrenman veya grup dersi" required maxlength="70"></label>
+        <div class="field-row">
+          <label class="field-label">Tarih<input name="date" type="date" required></label>
+          <label class="field-label">Saat<input name="time" type="time" required></label>
+        </div>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close-modal>Vazgeç</button>
+          <button class="button button-primary" type="submit">Seansı planla</button>
+        </div>
+      </form>
+    </dialog>
+
+    <main class="member-portal" id="member-portal" hidden>
+      <header class="member-topbar">
+        <a class="brand" href="#" aria-label="Salonun ana sayfa"><span class="brand-mark" aria-hidden="true">s</span><span>Salonun<span class="brand-period">.</span></span></a>
+        <button class="button button-secondary" type="button" data-sign-out>Çıkış yap</button>
+      </header>
+      <section class="member-content">
+        <p class="eyebrow">ÜYE PORTALI</p>
+        <h1>Merhaba, <span id="member-name">üyemiz</span> <span aria-hidden="true">💪</span></h1>
+        <p class="page-subtitle">Antrenman programını ve seans geçmişini buradan takip edebilirsin.</p>
+        <section class="panel member-sessions">
+          <div class="panel-heading"><div><h2>Antrenman seanslarım</h2><p id="member-session-summary">Seansların yükleniyor...</p></div></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>ANTRENMAN</th><th>TARİH &amp; SAAT</th><th>DURUM</th></tr></thead><tbody id="member-sessions-table"></tbody></table>
+            <div class="empty-state" id="member-sessions-empty" hidden><span class="empty-icon" aria-hidden="true">◷</span><strong>Henüz seans planlanmamış</strong><span>Planlanan seansların burada görünecek.</span></div>
+          </div>
+        </section>
+      </section>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
 </html>
