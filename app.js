@@ -367,14 +367,25 @@ function bindApplicationEvents() {
       const { error } = await supabase.functions.invoke("delete-member", {
         body: { member_id: member.id }
       });
-      if (error) throw error;
+      if (error) {
+        console.error("Üye silme fonksiyonu hata döndürdü:", error);
+        const detail = error.context instanceof Response
+          ? await error.context.clone().json().catch(() => null)
+          : null;
+        throw new Error(detail?.error || error.message || "Unknown function error");
+      }
       const refreshed = await refreshAdminData("Üye silindi ancak liste yenilenemedi.");
       showToast(refreshed ? "Üye ve seans kayıtları silindi." : "Üye silindi; listeyi yenilemek için sayfayı yenileyin.");
     } catch (error) {
       console.error("Üye silinemedi:", error);
       button.disabled = false;
       button.textContent = "Sil";
-      showToast("Üye silinemedi. Bağlantıyı ve yönetici yetkisini kontrol edip tekrar deneyin.");
+      const message = error instanceof Error ? error.message : "";
+      showToast(message === "Administrator access required"
+        ? "Bu işlem için yönetici yetkisi gerekiyor."
+        : message === "Authentication required"
+          ? "Oturum süresi dolmuş. Çıkış yapıp yeniden giriş yapın."
+          : "Üye silinemedi. Tekrar deneyin; sorun sürerse yöneticinize başvurun.");
     }
   });
   document.addEventListener("change", async (event) => {

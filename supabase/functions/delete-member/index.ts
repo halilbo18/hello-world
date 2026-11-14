@@ -25,6 +25,10 @@ Deno.serve(async (request: Request) => {
   if (!authorization?.startsWith("Bearer ")) {
     return respond({ error: "Authentication required" }, 401);
   }
+  const accessToken = authorization.slice("Bearer ".length);
+  if (!accessToken) {
+    return respond({ error: "Authentication required" }, 401);
+  }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -38,7 +42,7 @@ Deno.serve(async (request: Request) => {
     global: { headers: { Authorization: authorization } },
     auth: { autoRefreshToken: false, persistSession: false }
   });
-  const { data: userData, error: userError } = await userClient.auth.getUser();
+  const { data: userData, error: userError } = await userClient.auth.getUser(accessToken);
   if (userError || !userData.user) {
     return respond({ error: "Authentication required" }, 401);
   }
