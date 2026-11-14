@@ -68,30 +68,17 @@ okumasına izin verir. Yönetici davet ve silme fonksiyonları oturum açmış
 kullanıcının `admin` rolünü ayrıca doğrular. İzinler yalnızca arayüzde
 gizlenmeye dayanmaz.
 
-## GitHub'dan cPanel'e otomatik yayın
+## cPanel'e manuel yayın
 
-`master` dalına her push yapıldığında GitHub Actions, FTPS ile yalnızca
+Mevcut GüzelHosting paylaşımlı hosting hesabı SFTP/SSH ve FTPS/TLS sunmuyor;
+yalnızca şifresiz FTP destekliyor. FTP giriş bilgileri şifresiz aktarılacağı
+için bu projede otomatik FTP yayını etkinleştirilmez.
+
+Web sitesi dosyalarını güncellemek için yalnızca
 `index.html`, `app.js`, `styles.css` ve `supabase-config.js` dosyalarını
-cPanel'deki FTP hesabının kök klasörüne yükler. Var olan diğer dosyaları silmez.
-
-1. cPanel'de, sitenin belge kök klasörüne (genellikle
-   `/home/salonun/public_html`) sınırlı yeni bir FTP hesabı oluştur. Ana cPanel
-   hesabının parolasını kullanma.
-2. cPanel > **FTP Accounts > Configure FTP Client** bölümünden FTP sunucu adını
-   öğren. GitHub iş akışı doğrulanmış TLS sertifikasıyla açık FTPS ve port 21
-   kullanır.
-3. GitHub deposunda **Settings > Secrets and variables > Actions** bölümünde
-   şu repository secret değerlerini oluştur:
-   - `CPANEL_FTP_HOST`
-   - `CPANEL_FTP_USERNAME`
-   - `CPANEL_FTP_PASSWORD`
-4. Secret'ları ekledikten sonra değişiklikleri `master` dalına gönder. İlk
-   başarılı GitHub Actions çalıştırması site dosyalarını yayımlar; sonraki
-   `master` push'ları otomatik günceller.
-
-FTP parolasını kaynak koda veya sohbete yazma. Supabase veritabanı ve Edge
-Function değişiklikleri bu web yayın iş akışına dahil değildir; Supabase'e
-ayrıca dağıtılmalıdır.
+cPanel'de sitenin `public_html` klasörüne yükleyip mevcutların üzerine yaz.
+Alternatif olarak bu dosyaları ZIP yapıp aynı klasörde çıkar. Supabase
+veritabanı ve Edge Function değişiklikleri cPanel'e değil Supabase'e dağıtılır.
 
 ## Yerel önizleme ve geçici test adresi
 
